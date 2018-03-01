@@ -15,16 +15,6 @@ expected = sp.array([0.082, 0.015, 0.028, 0.043, 0.127, 0.022, 0.020, 0.061, 0.0
 		 0.008, 0.040, 0.024, 0.067, 0.075, 0.019, 0.001, 0.060, 0.063, 0.091,
 		  0.028, 0.010, 0.023, 0.001, 0.020, 0.001])
 
-class bcolors:
-	HEADER = '\033[95m'
-	OKBLUE = '\033[94m'
-	OKGREEN = '\033[92m'
-	WARNING = '\033[93m'
-	FAIL = '\033[91m'
-	ENDC = '\033[0m'
-	BOLD = '\033[1m'
-	UNDERLINE = '\033[4m'
-
 
 def getKeywordSubstrings(keywordlength, ciphertext):
 	substrings = []
@@ -208,7 +198,7 @@ def findKeywordLength(ciphertext, maximum=20):
 	ioc.append(0)
 	for keylength in range(3,maximum):
 		ioc.append(sum(getIndexOfCoincidence(keylength, ciphertext))/keylength)
-	print ioc
+	#print ioc
 	index, value = max(enumerate(ioc), key=operator.itemgetter(1))
 	print "Largest average Index of Coincidence is " + str(value) + " for key length " + str(index)
 	return index
@@ -225,7 +215,7 @@ def deinterleave(ciphertext,substrings):
 	return ''.join(plaintext)
 
 
-def keyDecode(string, key):
+def keywordDecrypt(string, keyword):
 	base = 0
 	shiftedstring = []
 	print key
@@ -256,7 +246,7 @@ def decryptVigenere(ciphertext):
 
 	print "Keyword recovered: " + str(''.join(keyword))
 	plaintext = deinterleave(ciphertext,plaintext_substrings)	# this is quicker since I already found plaintext substrings
-	#plaintext = keyDecode(ciphertext,key)
+	#plaintext = keywordDecrypt(ciphertext,keyword)
 	return plaintext.lower()
 
 

@@ -24,33 +24,23 @@ expected = sp.array([0.082, 0.015, 0.028, 0.043, 0.127, 0.022, 0.020, 0.061, 0.0
 		 0.008, 0.040, 0.024, 0.067, 0.075, 0.019, 0.001, 0.060, 0.063, 0.091,
 		  0.028, 0.010, 0.023, 0.001, 0.020, 0.001])
 
-class bcolors:
-	HEADER = '\033[95m'
-	OKBLUE = '\033[94m'
-	OKGREEN = '\033[92m'
-	WARNING = '\033[93m'
-	FAIL = '\033[91m'
-	ENDC = '\033[0m'
-	BOLD = '\033[1m'
-	UNDERLINE = '\033[4m'
-
-
-def variantShift(string):
-	print string
+# assume in this function first character is the zero shift reference
+# the variant shifts are applied to the right, so to un-shift we shift back to the left.
+def undoVariantShift(string):
+	#print string
 	shiftstring = []
-	for idx,val in enumerate(string):
-		for i in range(idx % 27):	# applies increasing shift on a repeating 26 letter cycle
-			#val = shiftLettersLeft(val)
-			val = shiftLettersRight(val)
-		shiftstring.append(val)
-	print ''.join(shiftstring)
+	for idx,letter in enumerate(string):
+		for i in range(idx % 26):	# applies increasing shift on a repeating 26 letter cycle
+			letter = shiftLettersLeft(letter)
+			#val = shiftLettersRight(val)
+		shiftstring.append(letter)
+	#print ''.join(shiftstring)
 	return ''.join(shiftstring)
 
 
-# looking for numbers close to 0.065
+# NOTE looking for numbers close to 0.065
 ''' This part will be different from the regular vigenere,
-	the shift will increase by 1 for each letter up to 26 letters and then reset
-	for each letter
+	the shift will increase by 1 for each letter up to 26 letters
 '''
 def getShiftWithIOCClosestToExpected(string):
 	plt.ion()
@@ -59,11 +49,13 @@ def getShiftWithIOCClosestToExpected(string):
 	last = 0
 	shift = 0
 	shiftstring = string
-
-	# additional shift applied here. Every character on 26 character cycle has +1 shift
-	shiftstring = variantShift(shiftstring)
-
 	plaintext_substring = ''
+
+	# undo the extra variant shift, +1 mod(26) for every character after the first one
+	# this only needs to happen once for each substring
+	shiftstring = undoVariantShift(shiftstring)
+
+	# loop through all 0-25 possible initial first letter shifts
 	for i in range(26):
 		if i is not 0:
 			shiftstring = shiftLettersLeft(shiftstring)
@@ -209,7 +201,7 @@ def getKeywordSubstrings(keywordlength, ciphertext):
 	return substrings
 
 
-''' Same as getKeywordSubstrings() but also calculates IOC for each substring '''
+# NOTE looking for numbers close to 0.065
 def getIndexOfCoincidence(keywordlength, ciphertext):
 	y = []
 	ioc = []
@@ -223,7 +215,10 @@ def getIndexOfCoincidence(keywordlength, ciphertext):
 				temp.append(val)
 		y.append(''.join(temp))
 
-		# calculate the IOC of each y[i]
+		# undo the extra variant shift, +1 mod(26) for every character in the substring after the first one
+		y[i] = undoVariantShift(y[i])
+
+		# calculate the IOC of each substring y[i]
 		ioc.append(0)
 		for c in expected_freq:
 			ioc[i] += y[i].count(c)/float(len(y[i])) * (y[i].count(c)-1)/(float(len(y[i]))-1)
@@ -238,7 +233,7 @@ def findKeywordLength(ciphertext, maximum=20):
 	ioc.append(0)
 	for keylength in range(3,maximum):
 		ioc.append(sum(getIndexOfCoincidence(keylength, ciphertext))/keylength)
-	print ioc
+	#print ioc
 	index, value = max(enumerate(ioc), key=operator.itemgetter(1))
 	print "Largest average Index of Coincidence is " + str(value) + " for key length " + str(index)
 	return index
@@ -272,10 +267,13 @@ def keyDecode(string, key):
 	return ''.join(shiftedstring)
 
 
-def decryptVigenere(ciphertext):
+def decryptVigenereVariant(ciphertext):
+	# this won't be possible without also finding keyword, have to just guess
 	keylength = findKeywordLength(ciphertext)
-	substrings = getKeywordSubstrings(keylength, ciphertext)
 
+	#maximum = 10
+	#for keylength in range(3,maximum):
+	substrings = getKeywordSubstrings(keylength, ciphertext)
 	alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 	shifts = range(keylength)
 	plaintext_substrings = range(keylength)
@@ -298,6 +296,6 @@ if __name__ == "__main__":
 		ciphertext = ''.join(text)  # combines separate lines into single string
 	else:
 		ciphertext = 'JKBNJGFNFUZZWKBCGSFCQLHPWUXMICRYQNOOPYXGIMBIFLCRYJTISZSTWWDFZMEKWMFHQEQLXCSILDVNUPLQJNOWYGHBCHEBLAKEVGWHXZAPFIXLJAYUUMRZIMABLLPKIOXBQXUAEIMRRXGZKGDRXYWHXKIXOLPAEBKBHFFCWYPPREBEUQNEJBVRYWVBFNPWOSKKZSUTMHRNVURPDTPFNNVLCQXNEQFBMYQOXHNIOORBELSFUKSUJFILOTZUZLJJOOLXSLSCXWGWOELFOMSJJHABPZEJPZEMFQYKENYSMBHCDXPDDNEUASJLIIIELQGUSTKEDMIUXLFZMLHHTGKXCGAFWKQOVBXY'
-	plaintext = decryptVigenere(ciphertext)
+	plaintext = decryptVigenereVariant(ciphertext)
 	print "Plaintext decrypted: "
 	print plaintext
