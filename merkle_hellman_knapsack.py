@@ -109,7 +109,7 @@ def findDigraph(decimal):
 
 
 if __name__ == "__main__":
-
+	print "Merkle-Hellman Knapsack System Example"
 	# superincreasing set of integers
 	A = [3, 5, 10, 19, 41, 79, 161, 320, 641, 1311]
 	# integer such that M > sum(A)
@@ -120,6 +120,7 @@ if __name__ == "__main__":
 	W_inverse_modM = findModularInverse(W,M)
 	#print W_inverse_modM
 
+	# TODO supposed to include permutation as well?
 	B = calculatePublicKey(W, A, M)
 	#print B
 
@@ -131,6 +132,7 @@ if __name__ == "__main__":
 
 	# was originally given ciphertext instead of plaintext for this problem
 	#ciphertext = [5622, 3258, 4589, 8349, 9224, 7001, 1514, 3460, 1926]
+	print "\nCiphertext: " + str(ciphertext)
 
 	knapsack = decrypt(W_inverse_modM, ciphertext, M)
 	#print knapsack
@@ -147,4 +149,4 @@ if __name__ == "__main__":
 		else:
 			print "Multiple possible digraphs: " + str(digraph)
 
-	print plaintext
+	print "Plaintext: " + str(plaintext) + "\n"

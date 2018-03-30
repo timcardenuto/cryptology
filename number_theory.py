@@ -70,9 +70,10 @@ if __name__ == "__main__":
     result = modularExponentiation(a,k,n)
     print "Repeated squaring method: " + str(result)
 
+    print "Modular Inverse of (3125^-1 mod 9987) :"
     a = 3125
     m = 9987
-    a = 28
-    m = 75
+    #a = 28
+    #m = 75
     result = findModularInverse(a, m)
     print result

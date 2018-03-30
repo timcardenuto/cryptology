@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+import math
 
 def decimalToBinary(decimal):
     # find # of bits needed to fit decimal value
@@ -35,12 +35,73 @@ def modularExponentiation(a,k,n):
     return b
 
 
-if __name__ == "__main__":
+def gcdExtended(a, b):
+	if a == 0:
+		x = 0
+		y = 1
+		return b, x, y
 
+	gcd, x1, y1 = gcdExtended(b%a, a)
+	x = y1 - (b/a) * x1
+	y = x1
+	return gcd, x, y
+
+
+def findModularInverse(a, m):
+	# extended Eclidean algorithm
+	gcd, x, y = gcdExtended(a, m)
+	if gcd != 1:
+		res = ''
+	else:
+		res = (x%m + m) % m
+	return res
+
+
+def factor(n):
+    p = []
+    q = []
+    for val in range(1,int(math.floor(math.sqrt(n)))):
+        if n%val is 0:
+            print str(val) + "," + str(n/val)
+            p.append(val)
+            q.append(n/val)
+    return p,q
+
+
+def decode(decimal):
+    if decimal - 17575 > 0:
+        print "Decimal out-of-bounds for decoder"
+        return '???'
+
+    alphabet = 'abcdefghijklmnopqrstuvwxyz'
+    letters = []
+    temp = 0
+    count = 0
+    while temp <= decimal:
+        temp += 676
+        count += 1
+    letters.append(alphabet[count-1])
+    decimal = decimal - (temp-676)
+
+    temp = 0
+    count = 0
+    while temp <= decimal:
+        temp += 26
+        count += 1
+    letters.append(alphabet[count-1])
+    decimal = decimal - (temp-26)
+
+    letters.append(alphabet[decimal%26])
+    return letters
+
+
+if __name__ == "__main__":
+    print "RSA Protocol Failure Example"
     ## Protocol failure example
     # each message encrypted by RSA is a single alphabet letter, so the total
     # search space per ciphertext number is only 25, and the key never changes
     ciphertext = [365, 0, 4845, 14930, 2608, 2608, 0]
+    print "\nCiphertext: " + str(ciphertext)
     # m^b mod n
     n = 18721
     b = 25
@@ -58,4 +119,32 @@ if __name__ == "__main__":
         # use the common index to find the plaintext letter for each ciphertext decimal value
         plaintext.append(alphabet[cipherdecimals.index(c)])
 
-    print ''.join(plaintext)
+    print "Plaintext: " + ''.join(plaintext) + "\n"
+
+
+    # Brute Force
+    print "RSA Brute Force"
+    ciphertext = [12423, 11524, 7243, 7459, 14303, 6127, 10964, 16399,
+                    9792, 13629, 14407, 18817, 18830, 13556, 3159, 16647,
+                    5300, 13951, 81, 8986, 8007, 13167, 10022, 17213]
+    n = 18923
+    b = 1261
+
+    # factor the public key 'n'. This only works because it's so small, 
+    # real world examples should be impossible to factor in a brute force manner like this
+    p,q = factor(n)
+
+    # could ignore the first factor - why would anyone pick p=1 and q=n ?
+    for idx in range(len(p)):
+        possible_phi = (p[idx]-1)*(q[idx]-1)
+        possible_a = findModularInverse(b,possible_phi)
+        if not possible_a:
+            print "Inverse doesn't exist for " + str(b) + "^-1 mod " + str(possible_phi)
+            continue
+
+        plaintext = []
+        for cipherdecimal in ciphertext:
+            plaindecimal = modularExponentiation(cipherdecimal,possible_a,n)
+            plaintext.extend(decode(plaindecimal))
+
+        print "Plaintext: " + ''.join(plaintext)

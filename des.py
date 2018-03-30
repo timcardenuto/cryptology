@@ -1,5 +1,17 @@
 #!/usr/bin/env python
 
+""" Notes
+     * This is in ECB mode only
+     * Cipher Block Chaining (CBC) mode would be easy to add, just extra XOR of
+       previous ciphertext with next plaintext before begining next block
+       (requires Initial Vector (IV) for first plaintext)
+     * Propogating CBC is an extra XOR on top of CBC
+     * Cipher Feedback (CFB) mode is a different placement of XOR from CBC
+     * Output Feedback (OFB) mode has different placement of XOR
+     * Counter (CTR) mode uses nonce w/ count instead of initialization vector
+     * In all these modes except ECB, there is the additional secret IV or in
+       the case of CTR mode, the nonce, required for both encryption and decryption
+"""
 
 # Feistel Cipher
 # maps a 2 l-bit plaintext (Lo, Ro) to a 2 l-bit ciphertext (Rr, Lr), through an r-round procedure
@@ -64,8 +76,6 @@
 
 import math
 
-#M = '1011010001110101001001011101010101111011010100110111110010010111'
-#C = '1001010100101001101001101001100010011101001101001111111010100100'
 '''### Helpful conversion functions #########################################'''
 
 def decimalTo4Bits(decimal):
