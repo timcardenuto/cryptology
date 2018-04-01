@@ -57,6 +57,8 @@ def findModularInverse(a, m):
 	return res
 
 
+# Returns all pairs of factors that multiplied will equal n
+# Stops at the square root of n, since all pairs found after that will just be mirror copies of the ones already found
 def factor(n):
     p = []
     q = []
@@ -95,8 +97,17 @@ def decode(decimal):
     return letters
 
 
+def commonModulusDecrypt(n, b1, b2, y1, y2):
+    c1 = findModularInverse(b1,b2)
+    c2 = (c1*b1 - 1)/b2
+    temp1 = modularExponentiation(y1,c1,n)
+    temp2 = findModularInverse(pow(y2,c2),n)
+    x1 = temp1 * temp2
+    return x1
+
+
 if __name__ == "__main__":
-    print "RSA Protocol Failure Example"
+    print "####     RSA Protocol Failure Example 1"
     ## Protocol failure example
     # each message encrypted by RSA is a single alphabet letter, so the total
     # search space per ciphertext number is only 25, and the key never changes
@@ -123,14 +134,14 @@ if __name__ == "__main__":
 
 
     # Brute Force
-    print "RSA Brute Force"
+    print "#### RSA Brute Force"
     ciphertext = [12423, 11524, 7243, 7459, 14303, 6127, 10964, 16399,
                     9792, 13629, 14407, 18817, 18830, 13556, 3159, 16647,
                     5300, 13951, 81, 8986, 8007, 13167, 10022, 17213]
     n = 18923
     b = 1261
 
-    # factor the public key 'n'. This only works because it's so small, 
+    # factor the public key 'n'. This only works because it's so small,
     # real world examples should be impossible to factor in a brute force manner like this
     p,q = factor(n)
 
@@ -147,4 +158,21 @@ if __name__ == "__main__":
             plaindecimal = modularExponentiation(cipherdecimal,possible_a,n)
             plaintext.extend(decode(plaindecimal))
 
-        print "Plaintext: " + ''.join(plaintext)
+        print "Plaintext: " + ''.join(plaintext) + "\n"
+
+
+    print "#### RSA Protocol Failure Example 2"
+    n = 18721
+    b1 = 43
+    b2 = 7717
+    y1 = 12677
+    y2 = 14702
+    x1 = commonModulusDecrypt(n, b1, b2, y1, y2)
+    print "Calculated x as " + str(x1)
+    # check results
+    checky1 = modularExponentiation(x1, b1, n)
+    checky2 = modularExponentiation(x1, b2, n)
+    if (checky1 == y1) and (checky2 == y2):
+        print "Success"
+    else:
+        print "Calculated x1 is not equal to x"

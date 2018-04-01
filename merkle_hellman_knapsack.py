@@ -88,9 +88,10 @@ def decodeKnapsack(A, knapsack):
 
 # This reads the binary from MSB left to LSB right (big endian)
 def BigEndianBinaryToDecimal(binary):
-	binary.reverse()
+	b = list(binary)	# actually copy, not reference since we're mucking it up
+	b.reverse()
 	decimal = 0
-	for idx,val in enumerate(binary):
+	for idx,val in enumerate(b):
 		decimal = decimal + val*pow(2,idx)
 	return decimal
 
@@ -122,10 +123,11 @@ if __name__ == "__main__":
 
 	# TODO supposed to include permutation as well?
 	B = calculatePublicKey(W, A, M)
-	#print B
+
 
 	pt = 'goddoesnotplaydice'
 	pb = encode(pt)
+	print pb
 	ciphertext = []
 	for p in pb:
 		ciphertext.append(encrypt(B, p))
