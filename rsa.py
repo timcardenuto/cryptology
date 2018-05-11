@@ -102,7 +102,7 @@ def commonModulusDecrypt(n, b1, b2, y1, y2):
     c2 = (c1*b1 - 1)/b2
     temp1 = modularExponentiation(y1,c1,n)
     temp2 = findModularInverse(pow(y2,c2),n)
-    x1 = temp1 * temp2
+    x1 = (temp1 * temp2) % n
     return x1
 
 
@@ -140,18 +140,26 @@ if __name__ == "__main__":
                     5300, 13951, 81, 8986, 8007, 13167, 10022, 17213]
     n = 18923
     b = 1261
+    print "n = " + str(n)
+    print "b = " + str(b)
 
     # factor the public key 'n'. This only works because it's so small,
     # real world examples should be impossible to factor in a brute force manner like this
+    print "Factors:"
     p,q = factor(n)
 
-    # could ignore the first factor - why would anyone pick p=1 and q=n ?
+    print "Ciphertext: " + str(ciphertext)
+
+    # could ignore the first factor - why would anyone pick p=1 and q=n? This always results in an imposible 'a'
+    # this decrypts the ciphertext for every pair of factors, so you'll end up with len(p) plaintext with only one likely to make any sense
     for idx in range(len(p)):
         possible_phi = (p[idx]-1)*(q[idx]-1)
         possible_a = findModularInverse(b,possible_phi)
         if not possible_a:
             print "Inverse doesn't exist for " + str(b) + "^-1 mod " + str(possible_phi)
             continue
+
+        print "Private key: " + str(possible_a)
 
         plaintext = []
         for cipherdecimal in ciphertext:
@@ -169,7 +177,7 @@ if __name__ == "__main__":
     y2 = 14702
     x1 = commonModulusDecrypt(n, b1, b2, y1, y2)
     print "Calculated x as " + str(x1)
-    # check results
+    # check result by calculating encrypted output from recovered plaintext
     checky1 = modularExponentiation(x1, b1, n)
     checky2 = modularExponentiation(x1, b2, n)
     if (checky1 == y1) and (checky2 == y2):
